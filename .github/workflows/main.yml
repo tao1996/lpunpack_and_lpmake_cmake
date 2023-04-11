@@ -16,8 +16,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: checkout
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: install cygwin
         uses: cygwin/cygwin-install-action@master
