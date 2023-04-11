@@ -1,28 +1,40 @@
-pkgname=e2fsporgs
-pkgver=1.0
+# Maintainer: Biswapriyo Nath <nathbappai@gmail.com>
+
+_realname=adbwinapi
+pkgbase=mingw-w64-${_realname}
+pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}")
+pkgver=33.0.3
 pkgrel=1
-pkgdesc="File system utilities for ext2/ext3/ext4 file systems with FSP patches applied"
-arch=('x86_64')
-url="https://github.com/fsp/e2fsprogs"
-license=('GPL')
-#depends=('e2fsprogs')
-#source=("https://github.com/fsp/e2fsprogs/archive/v${pkgver}.tar.gz")
+pkgdesc='ADB API for Windows (mingw-w64)'
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clang32')
+url='https://developer.android.com/studio/releases/platform-tools'
+license=('spdx:Apache-2.0')
+makedepends=("${MINGW_PACKAGE_PREFIX}-cmake")
 
 build() {
-  dir
-  mkdir build
-  cd build
+  declare _build_arch
+
+  if [ "${CARCH}" = "x86_64" ]; then
+    _build_arch="x64"
+  else
+    _build_arch="Win32"
+  fi
+
   MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
     "${MINGW_PREFIX}"/bin/cmake.exe \
-      -GNinja \
+      -G "Visual Studio 17 2022" \
       -DCMAKE_INSTALL_PREFIX="${MINGW_PREFIX}" \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DCMAKE_CXX_FLAGS="${CXXFLAGS}" \
-      -DCMAKE_C_FLAGS="${CFLAGS}" \
-      ../
+      -A "${_build_arch}" \
+      -B "build-${MSYSTEM}"
+
+  "${MINGW_PREFIX}"/bin/cmake.exe \
+    --build "build-${MSYSTEM}" \
+    --config Release
 }
 
 package() {
-  cd "${srcdir}/e2fsprogs-${pkgver}"
-  #make DESTDIR="${pkgdir}" install
+  cd "${srcdir}/build-${MSYSTEM}"
+  DESTDIR="${pkgdir}" "${MINGW_PREFIX}"/bin/cmake.exe --install .
+  install -Dm644 "${srcdir}/NOTICE" "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE"
 }
