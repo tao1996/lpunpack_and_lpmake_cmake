@@ -26,7 +26,8 @@ build() {
       -G "Visual Studio 17 2022" \
       -DCMAKE_INSTALL_PREFIX="${MINGW_PREFIX}" \
       -A "${_build_arch}" \
-      -B "build-${MSYSTEM}"
+      -B "build-${MSYSTEM}" \
+      ../
 
   "${MINGW_PREFIX}"/bin/cmake.exe \
     --build "build-${MSYSTEM}" \
