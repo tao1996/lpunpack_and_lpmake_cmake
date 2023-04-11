@@ -5,7 +5,7 @@ pkgdesc="File system utilities for ext2/ext3/ext4 file systems with FSP patches 
 arch=('x86_64')
 url="https://github.com/fsp/e2fsprogs"
 license=('GPL')
-depends=('e2fsprogs')
+#depends=('e2fsprogs')
 #source=("https://github.com/fsp/e2fsprogs/archive/v${pkgver}.tar.gz")
 
 build() {
