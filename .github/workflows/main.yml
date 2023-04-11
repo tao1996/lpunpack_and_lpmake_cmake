@@ -1,33 +1,43 @@
-name: main
+name: build
+
 on:
   push:
-    branches: [ "master" ]
+    paths-ignore:
+      - 'README.md'
+    branches:
+      - cygwin
   pull_request:
-    branches: [ "master" ]
+    paths-ignore:
+      - 'README.md'
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: windows-latest
-    defaults:
-      run:
-        shell: msys2 {0}
+
     steps:
-      - uses: actions/checkout@v3
-      - uses: msys2/setup-msys2@v2
+      - name: checkout
+        uses: actions/checkout@v3
         with:
-          msystem: UCRT64
-          update: true
-          install: base-devel git
-      - name: CI-Build
+          submodules: 'recursive'
+
+      - name: install go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19.2'
+
+      - name: install cygwin
+        uses: cygwin/cygwin-install-action@master
+        with:
+          packages: |
+            binutils, gcc-core, gcc-g++, libpcre2-devel,
+            ninja, git, perl, cmake, zlib-devel, libiconv-devel
+
+      - name: cmake build
+        env:
+          SHELLOPTS: igncr
+          CHERE_INVOKING: 1
+        shell: bash
         run: |
-          dos2unix PKGBUILD
-          makepkg-mingw --noconfirm --noprogressbar -sCLf --nocheck
-      - name: "Upload binaries"
-        if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: UCRT64-packages
-          path: |
-            mingw-w64-adbwinapi/*.pkg.tar.*
-            mingw-w64-android-tools/*.pkg.tar.*
+            cmake -B build -DCMAKE_BUILD_TYPE=Release &&cmake --build build --config Release
+
